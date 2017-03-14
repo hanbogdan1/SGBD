@@ -19,6 +19,7 @@ namespace SGBD_Lab_1
         DataSet ds;
         BindingSource bsd;
         BindingSource bsf;
+        DataRelation dr;
         public Form1()
         {
             InitializeComponent();
@@ -39,9 +40,9 @@ namespace SGBD_Lab_1
                 dataAdaptFact.Fill(ds, "Factura");
 
 
-                SqlCommandBuilder ComBuildDist = new SqlCommandBuilder(dataAdapDist);
+                //SqlCommandBuilder ComBuildDist = new SqlCommandBuilder(dataAdapDist);
 
-                DataRelation dr = new DataRelation("FK_DISTRIBUITOR_FACTURA", ds.Tables["Distribuitori"].Columns["Id"], ds.Tables["Factura"].Columns["IdDistribuitor"]);
+                dr = new DataRelation("FK_DISTRIBUITOR_FACTURA", ds.Tables["Distribuitori"].Columns["Id"], ds.Tables["Factura"].Columns["IdDistribuitor"]);
                 ds.Relations.Add(dr);
                 bsd.DataSource = ds;
                 bsd.DataMember = "Distribuitori";
@@ -64,8 +65,20 @@ namespace SGBD_Lab_1
 
         private void refresh_data()
         {
+            try {
 
-            dataAdaptFact.Update(ds);
+                ds.Clear();
+                dataAdapDist.Fill(ds, "Distribuitori");
+                dataAdaptFact.Fill(ds, "Factura");
+                }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
        
 
@@ -82,14 +95,13 @@ namespace SGBD_Lab_1
                     MessageBox.Show("Delete Succesfull !");
 
             }
-
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
             finally
             {
-                conn.Close();
+                refresh_data();
             }
         }
 
@@ -111,9 +123,7 @@ namespace SGBD_Lab_1
             if (textPret.Text != "" && textData.Text != "" && textIdPiesa.Text != "")
             {
                 try
-                {
-
-
+                {                    
                     dataAdaptFact.InsertCommand = new SqlCommand("insert into Factura (Pret,Data,idPiesa,idDistribuitor) Values( @pret, @data, @idPiesa, @idDist) ", conn);
                     dataAdaptFact.InsertCommand.Parameters.Add("@pret", SqlDbType.Real).Value = textPret.Text;
                     dataAdaptFact.InsertCommand.Parameters.Add("@data", SqlDbType.Date).Value = textData.Text;
@@ -130,15 +140,10 @@ namespace SGBD_Lab_1
                 }
                 finally
                 {
-                    conn.Close();
+                    refresh_data();
                 }
             }
-
-         
-
         }
-
-      
 
         private void ButtonUpdate_Click(object sender, EventArgs e)
         {
@@ -156,20 +161,21 @@ namespace SGBD_Lab_1
                     if (dataAdaptFact.UpdateCommand.ExecuteNonQuery() >= 1)
                     {
                         MessageBox.Show("Update Succesfull !");
-                        refresh_data();
                     }
                 }
 
                 catch (Exception ex)
                 {
+
                     MessageBox.Show(ex.Message);
                 }
                 finally
                 {
-                    conn.Close();
+                    refresh_data();
                 }
 
             }
         }
     }
 }
+    
