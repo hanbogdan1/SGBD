@@ -132,20 +132,14 @@ namespace SGBD_Lab_1
             {
                 try
                 {
-                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ChildColumnNames"].Split(','));
-                    List<String> Column_names_insert_parameter = new List<string>(ConfigurationManager.AppSettings["ColumnNamesInsertParameters"].Split(','));
-
-                    //dataAdaptFact.InsertCommand = new SqlCommand("insert into Factura (Pret,Data,idPiesa,idDistribuitor) Values( @pret, @data, @idPiesa, @idDist) ", conn);
-                    SqlCommand cmd = new SqlCommand("insert into " + ConfigurationManager.AppSettings["ChildTableName"] + "("
-                        + ConfigurationManager.AppSettings["ChildColumnNames"] + ") values (" + ConfigurationManager.AppSettings["ColumnNamesInsertParameters"] + ')', conn);
-
+                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ChildColumnNamesId"].Split(','));
+                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["InsertQuery"], conn);
 
                     foreach (string column in Column_names)
                     {
                         TextBox textBox = (TextBox)this.Controls["text" + column];
                         cmd.Parameters.AddWithValue("@" + column, textBox.Text);
                     }
-
 
                     conn.Open();
                     if (cmd.ExecuteNonQuery() != 0)
@@ -165,7 +159,7 @@ namespace SGBD_Lab_1
 
         private void ButtonUpdate_Click(object sender, EventArgs e)
         {
-            if (textPret.Text != "" && textData.Text != "" && textIdPiesa.Text != "")
+            if (textBoxAdresa.Text != "" && textBoxLocalitatea.Text != "" && textBoxTimpLivrare.Text != "")
             {
                 try
                 {
@@ -197,5 +191,108 @@ namespace SGBD_Lab_1
             }
         }
 
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+            if (textBoxAdresa.Text != "" && textBoxLocalitatea.Text != "" && textBoxTimpLivrare.Text != "")
+            {
+                try
+                {
+                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ParentColumnNamesId"].Split(','));
+                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["ParentInsertQuery"], conn);
+
+                    foreach (string column in Column_names)
+                    {
+                        TextBox textBox = (TextBox)this.Controls["textBox" + column];
+                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
+                    }
+
+                    conn.Open();
+                    if (cmd.ExecuteNonQuery() != 0)
+                        MessageBox.Show("Insert Succesfull !");
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    refresh_data();
+                }
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (textBoxId.Text != "")
+            {
+                try
+                {
+                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ParentColumnNamesJustId"].Split(','));
+                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["ParentDeleteQuery"], conn);
+
+                    foreach (string column in Column_names)
+                    {
+                        TextBox textBox = (TextBox)this.Controls["textBox" + column];
+                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
+                    }
+
+                    conn.Open();
+                    if (cmd.ExecuteNonQuery() != 0)
+                        MessageBox.Show("Delete Succesfull !");
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    refresh_data();
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (textBoxAdresa.Text != "" && textBoxLocalitatea.Text != "" && textBoxTimpLivrare.Text != "")
+            {
+                try
+                {
+                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ParentColumnNamesId"].Split(','));
+                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["ParentUpdateQuery"], conn);
+                    foreach (string column in Column_names)
+                    {
+                        TextBox textBox = (TextBox)this.Controls["textBox" + column];
+                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
+                    }
+
+
+
+                    conn.Open();
+                    if (cmd.ExecuteNonQuery() != 0)
+                        MessageBox.Show("Update Succesfull !");
+                }
+
+                catch (Exception ex)
+                {
+
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    refresh_data();
+                }
+
+            }
+        }
+
+        private void dataGridView3_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            textBoxId.Text = dataGridView3.Rows[e.RowIndex].Cells[0].Value.ToString();
+            textBoxAdresa.Text = dataGridView3.Rows[e.RowIndex].Cells[1].Value.ToString();
+            textBoxLocalitatea.Text = dataGridView3.Rows[e.RowIndex].Cells[2].Value.ToString();
+            textBoxTimpLivrare.Text = dataGridView3.Rows[e.RowIndex].Cells[3].Value.ToString();
+        }
     }
 }
