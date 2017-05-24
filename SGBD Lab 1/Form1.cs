@@ -28,7 +28,6 @@ namespace SGBD_Lab_1
             dataGridView3.ReadOnly = true;
             dataGridView4.ReadOnly = true;
 
-
             conn.Open();
             dataAdapDist = new SqlDataAdapter(ConfigurationSettings.AppSettings["select_dist"], conn);
             dataAdaptFact = new SqlDataAdapter(ConfigurationSettings.AppSettings["select_fact"], conn);
@@ -55,8 +54,6 @@ namespace SGBD_Lab_1
             dataGridView3.DataSource = bsd;
             Console.WriteLine(conn.State);
             conn.Close();
-
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -293,6 +290,11 @@ namespace SGBD_Lab_1
             textBoxAdresa.Text = dataGridView3.Rows[e.RowIndex].Cells[1].Value.ToString();
             textBoxLocalitatea.Text = dataGridView3.Rows[e.RowIndex].Cells[2].Value.ToString();
             textBoxTimpLivrare.Text = dataGridView3.Rows[e.RowIndex].Cells[3].Value.ToString();
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
