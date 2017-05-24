@@ -22,9 +22,17 @@ namespace SGBD_Lab_1
         BindingSource bsd;
         BindingSource bsf;
         DataRelation dr;
+        int childNumberOfColumns;
+        private TextBox[] textBoxes;
+        private Label[] labels;
+        List<String> Column_names;
+
         public Form1()
         {
+            Column_names = new List<string>(ConfigurationManager.AppSettings["ChildColumnNamesId"].Split(','));
+            childNumberOfColumns = Column_names.Count;
             InitializeComponent();
+            GenerateBoxes();
             dataGridView3.ReadOnly = true;
             dataGridView4.ReadOnly = true;
 
@@ -54,19 +62,45 @@ namespace SGBD_Lab_1
             dataGridView3.DataSource = bsd;
             Console.WriteLine(conn.State);
             conn.Close();
+
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+
+        private void GenerateBoxes()
         {
 
+            textBoxes = new TextBox[childNumberOfColumns];
+            labels = new Label[childNumberOfColumns];
 
+            for (int i = 0; i < childNumberOfColumns; i++)
+            {
+                textBoxes[i] = new TextBox();
+
+                labels[i] = new Label { Text = Column_names[i] };
+
+
+
+                labels[i].Left = 10;
+                labels[i].Top = (i + 1) * 23;
+
+                textBoxes[i].Left = 120;
+                textBoxes[i].Top = (i + 1) * 23;
+
+                if (labels[i].Text.StartsWith("id"))
+                    textBoxes[i].ReadOnly = true;
+                if (labels[i].Text.StartsWith("Id"))
+                    textBoxes[i].ReadOnly = true;
+
+                labels[i].AutoSize = true;
+                labels[i].Parent = fieldsPanel;
+                textBoxes[i].Parent = fieldsPanel;
+            }
         }
 
         private void refresh_data()
         {
             try
             {
-
                 ds.Clear();
                 dataAdapDist.Fill(ds, "Distribuitori");
                 dataAdaptFact.Fill(ds, "Factura");
@@ -84,59 +118,63 @@ namespace SGBD_Lab_1
 
         private void button3_Click(object sender, EventArgs e)
         {
-            try
-            {
-                List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ChildColumnNamesJustId"].Split(','));
-                SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["DeleteQuery"], conn);
-
-                foreach (string column in Column_names)
+            if (verificare_fields())
+                try
                 {
-                    TextBox textBox = (TextBox)this.Controls["text" + column];
-                    cmd.Parameters.AddWithValue("@" + column, textBox.Text);
+                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["DeleteQuery"], conn);
+                    cmd.Parameters.AddWithValue("@" + labels[0].Text, textBoxes[0].Text);
+
+                    conn.Open();
+                    if (cmd.ExecuteNonQuery() != 0)
+                        MessageBox.Show("Delete Succesfull !");
+
                 }
-
-                conn.Open();
-                if (cmd.ExecuteNonQuery() != 0)
-                    MessageBox.Show("Delete Succesfull !");
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                refresh_data();
-            }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    refresh_data();
+                }
         }
 
 
 
         private void dataGridView4_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            textPret.Text = dataGridView4.Rows[e.RowIndex].Cells[1].Value.ToString();
-            textData.Text = dataGridView4.Rows[e.RowIndex].Cells[2].Value.ToString();
-            textIdPiesa.Text = dataGridView4.Rows[e.RowIndex].Cells[3].Value.ToString();
-            textId.Text = dataGridView4.Rows[e.RowIndex].Cells[0].Value.ToString();
-            textIdDIstribuitor.Text = dataGridView4.Rows[e.RowIndex].Cells[4].Value.ToString();
+            for (int i = 0; i < childNumberOfColumns; i++)
+            {
+                textBoxes[i].Text = dataGridView4.Rows[e.RowIndex].Cells[i].Value.ToString();
+            }
+        }
 
+
+        bool verificare_fields()
+        {
+            foreach (TextBox xxxx in textBoxes)
+            {
+                if (xxxx.Text.Trim() == "")
+                {
+                    MessageBox.Show("Campurile trebuiesc completate !");
+                    return false;
+                }
+
+            }
+            return true;
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
         {
-
-            if (textPret.Text != "" && textData.Text != "" && textIdPiesa.Text != "")
+            //
+            if (verificare_fields())
             {
                 try
                 {
-                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ChildColumnNamesId"].Split(','));
                     SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["InsertQuery"], conn);
 
-                    foreach (string column in Column_names)
-                    {
-                        TextBox textBox = (TextBox)this.Controls["text" + column];
-                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
-                    }
+                    for (int i = 0; i < childNumberOfColumns; ++i)
+                        cmd.Parameters.AddWithValue("@" + labels[i].Text, textBoxes[i].Text);
 
                     conn.Open();
                     if (cmd.ExecuteNonQuery() != 0)
@@ -155,20 +193,14 @@ namespace SGBD_Lab_1
         }
 
         private void ButtonUpdate_Click(object sender, EventArgs e)
-        {
-            if (textBoxAdresa.Text != "" && textBoxLocalitatea.Text != "" && textBoxTimpLivrare.Text != "")
+        {//
+            if (verificare_fields())
             {
                 try
                 {
-                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ChildColumnNamesId"].Split(','));
                     SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["UpdateQuery"], conn);
-                    foreach (string column in Column_names)
-                    {
-                        TextBox textBox = (TextBox)this.Controls["text" + column];
-                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
-                    }
-
-
+                    for (int i = 0; i < childNumberOfColumns; ++i)
+                        cmd.Parameters.AddWithValue("@" + labels[i].Text, textBoxes[i].Text);
 
                     conn.Open();
                     if (cmd.ExecuteNonQuery() != 0)
@@ -188,113 +220,13 @@ namespace SGBD_Lab_1
             }
         }
 
-        private void button3_Click_1(object sender, EventArgs e)
-        {
-            if (textBoxAdresa.Text != "" && textBoxLocalitatea.Text != "" && textBoxTimpLivrare.Text != "")
-            {
-                try
-                {
-                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ParentColumnNamesId"].Split(','));
-                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["ParentInsertQuery"], conn);
-
-                    foreach (string column in Column_names)
-                    {
-                        TextBox textBox = (TextBox)this.Controls["textBox" + column];
-                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
-                    }
-
-                    conn.Open();
-                    if (cmd.ExecuteNonQuery() != 0)
-                        MessageBox.Show("Insert Succesfull !");
-
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-                finally
-                {
-                    refresh_data();
-                }
-            }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (textBoxId.Text != "")
-            {
-                try
-                {
-                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ParentColumnNamesJustId"].Split(','));
-                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["ParentDeleteQuery"], conn);
-
-                    foreach (string column in Column_names)
-                    {
-                        TextBox textBox = (TextBox)this.Controls["textBox" + column];
-                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
-                    }
-
-                    conn.Open();
-                    if (cmd.ExecuteNonQuery() != 0)
-                        MessageBox.Show("Delete Succesfull !");
-
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-                finally
-                {
-                    refresh_data();
-                }
-            }
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            if (textBoxAdresa.Text != "" && textBoxLocalitatea.Text != "" && textBoxTimpLivrare.Text != "")
-            {
-                try
-                {
-                    List<String> Column_names = new List<string>(ConfigurationManager.AppSettings["ParentColumnNamesId"].Split(','));
-                    SqlCommand cmd = new SqlCommand(ConfigurationManager.AppSettings["ParentUpdateQuery"], conn);
-                    foreach (string column in Column_names)
-                    {
-                        TextBox textBox = (TextBox)this.Controls["textBox" + column];
-                        cmd.Parameters.AddWithValue("@" + column, textBox.Text);
-                    }
-
-
-
-                    conn.Open();
-                    if (cmd.ExecuteNonQuery() != 0)
-                        MessageBox.Show("Update Succesfull !");
-                }
-
-                catch (Exception ex)
-                {
-
-                    MessageBox.Show(ex.Message);
-                }
-                finally
-                {
-                    refresh_data();
-                }
-
-            }
-        }
 
         private void dataGridView3_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
-            textBoxId.Text = dataGridView3.Rows[e.RowIndex].Cells[0].Value.ToString();
-            textBoxAdresa.Text = dataGridView3.Rows[e.RowIndex].Cells[1].Value.ToString();
-            textBoxLocalitatea.Text = dataGridView3.Rows[e.RowIndex].Cells[2].Value.ToString();
-            textBoxTimpLivrare.Text = dataGridView3.Rows[e.RowIndex].Cells[3].Value.ToString();
-        }
-
-        private void Form1_Load_1(object sender, EventArgs e)
-        {
-
+            for (int i = 0; i < childNumberOfColumns; i++)
+            {
+                textBoxes[i].Text = dataGridView3.Rows[e.RowIndex].Cells[i].Value.ToString();
+            }
         }
     }
 }
