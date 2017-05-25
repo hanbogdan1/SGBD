@@ -34,6 +34,7 @@
             this.ButtonUpdate = new System.Windows.Forms.Button();
             this.buttonStergere = new System.Windows.Forms.Button();
             this.fieldsPanel = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView4)).BeginInit();
             this.SuspendLayout();
@@ -93,9 +94,20 @@
             this.fieldsPanel.Size = new System.Drawing.Size(367, 281);
             this.fieldsPanel.TabIndex = 5;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(734, 468);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(127, 23);
+            this.button1.TabIndex = 6;
+            this.button1.Text = "testDeadLOck";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(956, 526);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.fieldsPanel);
             this.Controls.Add(this.buttonStergere);
             this.Controls.Add(this.ButtonUpdate);
@@ -118,6 +130,7 @@
         private System.Windows.Forms.Button ButtonUpdate;
         private System.Windows.Forms.Button buttonStergere;
         private System.Windows.Forms.Panel fieldsPanel;
+        private System.Windows.Forms.Button button1;
     }
 }
 

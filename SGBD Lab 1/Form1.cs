@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Collections.Specialized;
+using System.Threading;
 
 namespace SGBD_Lab_1
 {
@@ -143,6 +144,8 @@ namespace SGBD_Lab_1
 
         private void dataGridView4_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
+            if (childNumberOfColumns  != dataGridView4.ColumnCount )
+                return;
             for (int i = 0; i < childNumberOfColumns; i++)
             {
                 textBoxes[i].Text = dataGridView4.Rows[e.RowIndex].Cells[i].Value.ToString();
@@ -223,10 +226,39 @@ namespace SGBD_Lab_1
 
         private void dataGridView3_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
+            if (childNumberOfColumns  != dataGridView3.ColumnCount-1)
+                return;
             for (int i = 0; i < childNumberOfColumns; i++)
             {
                 textBoxes[i].Text = dataGridView3.Rows[e.RowIndex].Cells[i].Value.ToString();
             }
+        }
+
+
+
+        //trans1 sau trans2
+        void thread(string nume_proc)
+        {
+            using (SqlCommand cmd = new SqlCommand(nume_proc, conn))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        void dead_lock()
+        {
+            conn.Open();
+            Thread t3 = new Thread(() => thread("trans1"));
+            t3.Start();
+            Thread t4 = new Thread(() => thread("trans2"));
+            t4.Start();
+
+            conn.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
